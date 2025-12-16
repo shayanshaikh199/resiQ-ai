@@ -1,0 +1,9 @@
+fastapi==0.115.0
+uvicorn==0.30.6
+jinja2==3.1.4
+python-multipart==0.0.9
+pandas==2.2.2
+scikit-learn==1.5.1
+numpy==2.0.1
+joblib==1.4.2
+pypdf==5.1.0
