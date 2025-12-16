@@ -13,14 +13,12 @@
         </header>
 
         <main class="card">
-            <form method="post" action="/analyze">
+            <form method="post" action="/analyze" enctype="multipart/form-data">
+
                 <div class="inputs">
                     <div class="input-group">
-                        <label>Resume Text</label>
-                        <textarea
-                            name="resume_text"
-                            placeholder="Paste resume text here..."
-                            required></textarea>
+                        <label>Resume (PDF)</label>
+                        <input type="file" name="resume_pdf" accept=".pdf" required />
                     </div>
 
                     <div class="input-group">
