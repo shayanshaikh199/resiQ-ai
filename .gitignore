@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+
+# Virtual env
+.venv/
+venv/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+
+# Model artifacts
+models/*.joblib
+models/*.pkl
+
+# Data I might not want public later
+data/*.pdf
+data/*.docx
+data/*.txt

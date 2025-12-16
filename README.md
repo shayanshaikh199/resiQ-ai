@@ -1,9 +1,13 @@
-# Resume Matcher AI (NLP + ML)
+# ResIQ AI
 
-Web app that compares a resume and job description using:
+**ResIQ AI** is a web-based NLP system that evaluates how well a resume matches a job description using machine learning.
+
+## Features
 - TF-IDF similarity baseline
-- Logistic Regression classifier
-- Confidence + explanation features
+- ML-based relevance classification
+- Confidence scoring
+- Explainable predictions
+- Web interface for real-time analysis
 
 ## Status
-In progress.
+In active development.
