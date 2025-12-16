@@ -6,31 +6,61 @@
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <div class="container">
-        <h1>ResIQ AI</h1>
-        <p class="subtitle">Resume–Job Match Intelligence</p>
+    <div class="page">
+        <header class="header">
+            <h1>ResIQ AI</h1>
+            <p>Resume–Job Match Intelligence</p>
+        </header>
 
-        <form method="post" action="/analyze">
-            <label>Resume Text</label>
-            <textarea name="resume_text" placeholder="Paste resume text here..." required></textarea>
+        <main class="card">
+            <form method="post" action="/analyze">
+                <div class="inputs">
+                    <div class="input-group">
+                        <label>Resume Text</label>
+                        <textarea
+                            name="resume_text"
+                            placeholder="Paste resume text here..."
+                            required></textarea>
+                    </div>
 
-            <label>Job Description</label>
-            <textarea name="job_text" placeholder="Paste job description here..." required></textarea>
+                    <div class="input-group">
+                        <label>Job Description</label>
+                        <textarea
+                            name="job_text"
+                            placeholder="Paste job description here..."
+                            required></textarea>
+                    </div>
+                </div>
 
-            <button type="submit">Analyze Match</button>
-        </form>
+                <button type="submit" class="analyze-btn">
+                    Analyze Match
+                </button>
+            </form>
 
-        {% if result %}
-        <div class="result">
-            <h2>Result</h2>
-            <p><strong>Prediction:</strong> {{ "Match" if result.prediction == 1 else "No Match" }}</p>
-            <p><strong>Confidence:</strong> {{ result.confidence }}</p>
+            {% if result %}
+            <div class="result-card">
+                <h2>Result</h2>
 
-            {% if result.uncertain %}
-                <p class="warning">⚠️ Model is uncertain about this prediction.</p>
+                <div class="badge {{ 'match' if result.prediction == 1 else 'nomatch' }}">
+                    {{ "Match" if result.prediction == 1 else "No Match" }}
+                </div>
+
+                <p class="confidence">
+                    Confidence: <strong>{{ result.confidence }}</strong>
+                </p>
+
+                {% if result.uncertain %}
+                    <p class="warning">
+                        ⚠️ Model is uncertain about this prediction
+                    </p>
+                {% endif %}
+            </div>
             {% endif %}
-        </div>
-        {% endif %}
+        </main>
+
+        <footer class="footer">
+            <p>Built with custom ML + NLP · ResIQ AI</p>
+        </footer>
     </div>
 </body>
 </html>
