@@ -1,34 +1,35 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
+from fastapi import FastAPI, Request, Form
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 
 from predict import ResIQPredictor
 
 app = FastAPI(title="ResIQ AI")
 
-# Load model once at startup
+# Static files and templates
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="templates")
+
 predictor = ResIQPredictor()
 
 
-class MatchRequest(BaseModel):
-    resume_text: str
-    job_text: str
-
-
-class MatchResponse(BaseModel):
-    prediction: int
-    confidence: float
-    uncertain: bool
-
-
-@app.get("/")
-def health_check():
-    return {"status": "ResIQ AI running"}
-
-
-@app.post("/predict", response_model=MatchResponse)
-def predict_match(data: MatchRequest):
-    result = predictor.predict(
-        resume_text=data.resume_text,
-        job_text=data.job_text
+@app.get("/", response_class=HTMLResponse)
+def home(request: Request):
+    return templates.TemplateResponse(
+        "index.html",
+        {"request": request, "result": None}
     )
-    return result
+
+
+@app.post("/analyze", response_class=HTMLResponse)
+def analyze(
+    request: Request,
+    resume_text: str = Form(...),
+    job_text: str = Form(...)
+):
+    result = predictor.predict(resume_text, job_text)
+    return templates.TemplateResponse(
+        "index.html",
+        {"request": request, "result": result}
+    )

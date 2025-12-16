@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>ResIQ AI</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>ResIQ AI</h1>
+        <p class="subtitle">Resume–Job Match Intelligence</p>
+
+        <form method="post" action="/analyze">
+            <label>Resume Text</label>
+            <textarea name="resume_text" placeholder="Paste resume text here..." required></textarea>
+
+            <label>Job Description</label>
+            <textarea name="job_text" placeholder="Paste job description here..." required></textarea>
+
+            <button type="submit">Analyze Match</button>
+        </form>
+
+        {% if result %}
+        <div class="result">
+            <h2>Result</h2>
+            <p><strong>Prediction:</strong> {{ "Match" if result.prediction == 1 else "No Match" }}</p>
+            <p><strong>Confidence:</strong> {{ result.confidence }}</p>
+
+            {% if result.uncertain %}
+                <p class="warning">⚠️ Model is uncertain about this prediction.</p>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
