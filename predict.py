@@ -1,28 +1,37 @@
 import joblib
+from sanity import looks_like_resume
 
 MODEL_PATH = "models/resiq_model.joblib"
-UNCERTAINTY_THRESHOLD = 0.15  # how close to 0.5 counts as uncertain
+UNCERTAINTY_THRESHOLD = 0.15
 
 
 class ResIQPredictor:
     def __init__(self):
-        # Load trained pipeline
-        self.pipeline = joblib.load(MODEL_PATH)
+        self.pipeline = None
+
+    def load_model(self):
+        if self.pipeline is None:
+            print("DEBUG: Loading ML model...")
+            self.pipeline = joblib.load(MODEL_PATH)
+            print("DEBUG: Model loaded")
 
     def predict(self, resume_text: str, job_text: str):
-        # Combine texts
-        text = resume_text + " " + job_text
+        self.load_model()
 
-        # Probability of a good match (class 1)
-        prob = self.pipeline.predict_proba([text])[0][1]
+        # Sanity check: reject non-resume text
+        if not looks_like_resume(resume_text):
+            return {
+                "prediction": 0,
+                "confidence": 0.0,
+                "uncertain": False,
+                "reason": "Uploaded document does not appear to be a resume"
+            }
 
-        prediction = int(prob >= 0.5)
-
-        # Uncertainty = closeness to decision boundary
-        uncertainty = abs(prob - 0.5)
+        combined_text = resume_text + " " + job_text
+        prob = self.pipeline.predict_proba([combined_text])[0][1]
 
         return {
-            "prediction": prediction,
+            "prediction": int(prob >= 0.5),
             "confidence": round(prob, 3),
-            "uncertain": uncertainty < UNCERTAINTY_THRESHOLD
+            "uncertain": abs(prob - 0.5) < UNCERTAINTY_THRESHOLD
         }

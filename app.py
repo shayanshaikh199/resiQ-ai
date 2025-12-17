@@ -1,18 +1,18 @@
-from fastapi import FastAPI, Request, Form, UploadFile, File
+from fastapi import FastAPI, Request, UploadFile, File, Form
 from fastapi.responses import HTMLResponse
-from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
 
 from predict import ResIQPredictor
-from pdf_utils import extract_text_from_pdf
+from utils import extract_text_from_pdf
 
-app = FastAPI(title="ResIQ AI")
+app = FastAPI()
 
-# Static files and templates
+# Static + templates
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
-# Load model once
+# Predictor (lazy-load model)
 predictor = ResIQPredictor()
 
 
@@ -25,16 +25,26 @@ def home(request: Request):
 
 
 @app.post("/analyze", response_class=HTMLResponse)
-async def analyze(
+def analyze(
     request: Request,
     resume_pdf: UploadFile = File(...),
     job_text: str = Form(...)
 ):
-    resume_text = extract_text_from_pdf(resume_pdf.file)
+    print("DEBUG: analyze route hit")
+
+    pdf_bytes = resume_pdf.file.read()
+    print("DEBUG: PDF size =", len(pdf_bytes))
+
+    resume_text = extract_text_from_pdf(pdf_bytes)
+    print("DEBUG: extracted text length =", len(resume_text))
 
     result = predictor.predict(resume_text, job_text)
+    print("DEBUG: prediction complete")
 
     return templates.TemplateResponse(
         "index.html",
-        {"request": request, "result": result}
+        {
+            "request": request,
+            "result": result
+        }
     )

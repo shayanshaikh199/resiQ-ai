@@ -7,27 +7,41 @@
 </head>
 <body>
     <div class="page">
+
+        <!-- HEADER -->
         <header class="header">
             <h1>ResIQ AI</h1>
             <p>Resume–Job Match Intelligence</p>
         </header>
 
+        <!-- MAIN CARD -->
         <main class="card">
+
+            <!-- FORM -->
             <form method="post" action="/analyze" enctype="multipart/form-data">
 
                 <div class="inputs">
+
+                    <!-- PDF UPLOAD -->
                     <div class="input-group">
                         <label>Resume (PDF)</label>
-                        <input type="file" name="resume_pdf" accept=".pdf" required />
+                        <input
+                            type="file"
+                            name="resume_pdf"
+                            accept=".pdf"
+                            required
+                        />
                     </div>
 
+                    <!-- JOB DESCRIPTION -->
                     <div class="input-group">
                         <label>Job Description</label>
                         <textarea
                             name="job_text"
-                            placeholder="Paste job description here..."
+                            placeholder="Paste the job description here..."
                             required></textarea>
                     </div>
+
                 </div>
 
                 <button type="submit" class="analyze-btn">
@@ -35,18 +49,34 @@
                 </button>
             </form>
 
+            <!-- RESULT -->
             {% if result %}
             <div class="result-card">
                 <h2>Result</h2>
 
+                <!-- MATCH / NO MATCH -->
                 <div class="badge {{ 'match' if result.prediction == 1 else 'nomatch' }}">
                     {{ "Match" if result.prediction == 1 else "No Match" }}
                 </div>
 
-                <p class="confidence">
-                    Confidence: <strong>{{ result.confidence }}</strong>
-                </p>
+                <!-- CONFIDENCE + DOMAIN SCORE -->
+                {% if result.confidence > 0 %}
+                    <p class="confidence">
+                        ML Confidence:
+                        <strong>{{ result.confidence }}</strong>
+                    </p>
 
+                    <p class="confidence">
+                        Domain Relevance Score:
+                        <strong>{{ result.domain_score }}</strong>
+                    </p>
+                {% else %}
+                    <p class="warning">
+                        {{ result.reason }}
+                    </p>
+                {% endif %}
+
+                <!-- UNCERTAINTY -->
                 {% if result.uncertain %}
                     <p class="warning">
                         ⚠️ Model is uncertain about this prediction
@@ -54,11 +84,16 @@
                 {% endif %}
             </div>
             {% endif %}
+
         </main>
 
+        <!-- FOOTER -->
         <footer class="footer">
-            <p>Built with custom ML + NLP · ResIQ AI</p>
+            <p>
+                Built with custom ML + NLP · ResIQ AI
+            </p>
         </footer>
+
     </div>
 </body>
 </html>
