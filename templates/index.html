@@ -10,7 +10,7 @@
 
 <header class="header">
     <h1>ResIQ AI</h1>
-    <p>Semantic Resume–Job Match Intelligence</p>
+    <p>AI-powered resume matching & improvement</p>
 </header>
 
 <main class="card">
@@ -30,7 +30,7 @@
 
     </div>
 
-    <button type="submit" class="analyze-btn">Analyze Match</button>
+    <button type="submit" class="analyze-btn">Analyze Resume</button>
 </form>
 
 {% if result %}
@@ -50,19 +50,11 @@
     <p class="warning">⚠️ Model is uncertain</p>
     {% endif %}
 
-    {% if result.keywords %}
+    {% if result.ai_explanation %}
     <div class="explanation">
-        <h3>Why this result?</h3>
-        <ul>
-            {% for kw in result.keywords %}
-            <li>{{ kw }}</li>
-            {% endfor %}
-        </ul>
+        <h3>AI Explanation & Resume Tips</h3>
+        <pre>{{ result.ai_explanation }}</pre>
     </div>
-    {% endif %}
-
-    {% if result.reason %}
-    <p class="warning">{{ result.reason }}</p>
     {% endif %}
 </div>
 {% endif %}
@@ -70,7 +62,7 @@
 </main>
 
 <footer class="footer">
-    <p>Built with semantic embeddings · ResIQ AI</p>
+    <p>Decision logic by ResIQ AI · Explanations powered by Gemini</p>
 </footer>
 
 </div>
