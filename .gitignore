@@ -24,3 +24,6 @@ models/*.pkl
 data/*.pdf
 data/*.docx
 data/*.txt
+
+#contains key
+.env
