@@ -8,11 +8,11 @@ from utils import extract_text_from_pdf
 
 app = FastAPI()
 
-# Static + templates
+# Static assets + templates
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
-# Predictor (lazy-load model)
+# Predictor (now embedding-based)
 predictor = ResIQPredictor()
 
 
@@ -33,13 +33,9 @@ def analyze(
     print("DEBUG: analyze route hit")
 
     pdf_bytes = resume_pdf.file.read()
-    print("DEBUG: PDF size =", len(pdf_bytes))
-
     resume_text = extract_text_from_pdf(pdf_bytes)
-    print("DEBUG: extracted text length =", len(resume_text))
 
     result = predictor.predict(resume_text, job_text)
-    print("DEBUG: prediction complete")
 
     return templates.TemplateResponse(
         "index.html",

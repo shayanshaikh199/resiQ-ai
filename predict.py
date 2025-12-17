@@ -1,24 +1,28 @@
-import joblib
-from sanity import looks_like_resume
+"""
+predict.py
 
-MODEL_PATH = "models/resiq_model.joblib"
-UNCERTAINTY_THRESHOLD = 0.15
+High-level prediction logic for ResIQ AI.
+Uses semantic embeddings instead of TF-IDF classification.
+"""
+
+from sanity import looks_like_resume
+from embedding_matcher import EmbeddingMatcher
+
+# Similarity thresholds (tuned, explainable)
+MATCH_THRESHOLD = 0.55
+UNCERTAIN_MARGIN = 0.05
 
 
 class ResIQPredictor:
     def __init__(self):
-        self.pipeline = None
-
-    def load_model(self):
-        if self.pipeline is None:
-            print("DEBUG: Loading ML model...")
-            self.pipeline = joblib.load(MODEL_PATH)
-            print("DEBUG: Model loaded")
+        self.matcher = EmbeddingMatcher()
 
     def predict(self, resume_text: str, job_text: str):
-        self.load_model()
+        """
+        Returns match decision based on semantic similarity.
+        """
 
-        # Sanity check: reject non-resume text
+        # Step 1: Sanity check — is this even a resume?
         if not looks_like_resume(resume_text):
             return {
                 "prediction": 0,
@@ -27,11 +31,15 @@ class ResIQPredictor:
                 "reason": "Uploaded document does not appear to be a resume"
             }
 
-        combined_text = resume_text + " " + job_text
-        prob = self.pipeline.predict_proba([combined_text])[0][1]
+        # Step 2: Semantic similarity
+        similarity = self.matcher.similarity(resume_text, job_text)
+
+        # Step 3: Decision logic
+        prediction = int(similarity >= MATCH_THRESHOLD)
+        uncertain = abs(similarity - MATCH_THRESHOLD) <= UNCERTAIN_MARGIN
 
         return {
-            "prediction": int(prob >= 0.5),
-            "confidence": round(prob, 3),
-            "uncertain": abs(prob - 0.5) < UNCERTAINTY_THRESHOLD
+            "prediction": prediction,
+            "confidence": round(similarity, 3),
+            "uncertain": uncertain
         }
