@@ -1,49 +1,35 @@
 """
 predict.py
 
-Final prediction + explanation pipeline for ResIQ AI.
+Handles similarity scoring and recommendation generation.
 """
 
-from sanity import looks_like_resume
-from embedding_matcher import EmbeddingMatcher
-from llm_explainer import GeminiExplainer
-
-MATCH_THRESHOLD = 0.55
-UNCERTAIN_MARGIN = 0.05
+import joblib
+from sklearn.metrics.pairwise import cosine_similarity
+from recommendations import generate_recommendations
 
 
 class ResIQPredictor:
     def __init__(self):
-        self.matcher = EmbeddingMatcher()
-        self.llm = GeminiExplainer()
+        self.vectorizer = joblib.load("models/vectorizer.joblib")
+        self.model = joblib.load("models/resiq_model.joblib")
 
-    def predict(self, resume_text: str, job_text: str):
-        # Step 1: Sanity check
-        if not looks_like_resume(resume_text):
-            return {
-                "prediction": 0,
-                "confidence": 0.0,
-                "uncertain": False,
-                "reason": "Uploaded document does not appear to be a resume",
-                "ai_explanation": None
-            }
+    def predict(self, resume_text: str, job_text: str) -> dict:
+        vectors = self.vectorizer.transform([resume_text, job_text])
+        similarity = cosine_similarity(vectors[0], vectors[1])[0][0]
 
-        # Step 2: Semantic similarity
-        similarity = self.matcher.similarity(resume_text, job_text)
-        prediction = int(similarity >= MATCH_THRESHOLD)
-        uncertain = abs(similarity - MATCH_THRESHOLD) <= UNCERTAIN_MARGIN
+        prediction = int(similarity >= 0.6)
 
-        # Step 3: Gemini explanation (UX layer only)
-        explanation = self.llm.explain(
+        insights = generate_recommendations(
             resume_text=resume_text,
             job_text=job_text,
-            similarity_score=round(similarity, 3),
-            is_match=prediction == 1
+            similarity_score=similarity,
+            is_match=bool(prediction)
         )
 
         return {
             "prediction": prediction,
-            "confidence": round(similarity, 3),
-            "uncertain": uncertain,
-            "ai_explanation": explanation
+            "confidence": round(float(similarity), 3),
+            "explanation": insights["explanation"],
+            "recommendations": insights["recommendations"]
         }

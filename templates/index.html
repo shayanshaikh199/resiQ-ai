@@ -1,70 +1,120 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <title>ResIQ AI</title>
-    <link rel="stylesheet" href="/static/style.css">
+  <meta charset="UTF-8" />
+  <title>ResIQ AI</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fb;
+      padding: 40px;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+    }
+    textarea, input {
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px;
+    }
+    button {
+      margin-top: 15px;
+      padding: 12px;
+      width: 100%;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .result {
+      margin-top: 25px;
+      padding: 15px;
+      border-radius: 6px;
+    }
+    .match {
+      background: #e7f7ec;
+      border-left: 6px solid #28a745;
+    }
+    .nomatch {
+      background: #fdeaea;
+      border-left: 6px solid #dc3545;
+    }
+    ul {
+      margin-top: 8px;
+    }
+  </style>
 </head>
 <body>
-<div class="page">
+  <div class="container">
+    <h2>ResIQ AI — Resume Matcher</h2>
 
-<header class="header">
-    <h1>ResIQ AI</h1>
-    <p>AI-powered resume matching & improvement</p>
-</header>
+    <form id="analyze-form">
+      <label>Upload Resume (PDF)</label>
+      <input type="file" id="resume" accept=".pdf" required />
 
-<main class="card">
+      <label>Job Description</label>
+      <textarea id="job" rows="6" required></textarea>
 
-<form method="post" action="/analyze" enctype="multipart/form-data">
-    <div class="inputs">
+      <button type="submit">Analyze</button>
+    </form>
 
-        <div class="input-group">
-            <label>Resume (PDF)</label>
-            <input type="file" name="resume_pdf" accept=".pdf" required>
-        </div>
+    <div id="loading" style="display:none;">Analyzing…</div>
 
-        <div class="input-group">
-            <label>Job Description</label>
-            <textarea name="job_text" required></textarea>
-        </div>
+    <div id="output"></div>
+  </div>
 
-    </div>
+  <script>
+    const form = document.getElementById("analyze-form");
+    const output = document.getElementById("output");
+    const loading = document.getElementById("loading");
 
-    <button type="submit" class="analyze-btn">Analyze Resume</button>
-</form>
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      output.innerHTML = "";
+      loading.style.display = "block";
 
-{% if result %}
-<div class="result-card">
-    <h2>Result</h2>
+      const resume = document.getElementById("resume").files[0];
+      const job = document.getElementById("job").value;
 
-    <div class="badge {{ 'match' if result.prediction == 1 else 'nomatch' }}">
-        {{ "Match" if result.prediction == 1 else "No Match" }}
-    </div>
+      const formData = new FormData();
+      formData.append("resume", resume);
+      formData.append("job_description", job);
 
-    <p class="confidence">
-        Semantic Similarity Score:
-        <strong>{{ result.confidence }}</strong>
-    </p>
+      try {
+        const res = await fetch("/analyze", {
+          method: "POST",
+          body: formData
+        });
 
-    {% if result.uncertain %}
-    <p class="warning">⚠️ Model is uncertain</p>
-    {% endif %}
+        const data = await res.json();
 
-    {% if result.ai_explanation %}
-    <div class="explanation">
-        <h3>AI Explanation & Resume Tips</h3>
-        <pre>{{ result.ai_explanation }}</pre>
-    </div>
-    {% endif %}
-</div>
-{% endif %}
+        loading.style.display = "none";
 
-</main>
+        const isMatch = data.prediction === 1;
 
-<footer class="footer">
-    <p>Decision logic by ResIQ AI · Explanations powered by Gemini</p>
-</footer>
+        output.innerHTML = `
+          <div class="result ${isMatch ? "match" : "nomatch"}">
+            <h3>${isMatch ? "Match ✅" : "No Match ❌"}</h3>
+            <p><strong>Semantic Similarity:</strong> ${data.confidence}</p>
 
-</div>
+            <h4>Why this result</h4>
+            <ul>
+              ${data.explanation.map(e => `<li>${e}</li>`).join("")}
+            </ul>
+
+            <h4>Resume Recommendations</h4>
+            <ul>
+              ${data.recommendations.map(r => `<li>${r}</li>`).join("")}
+            </ul>
+          </div>
+        `;
+      } catch (err) {
+        loading.style.display = "none";
+        output.innerHTML = `<p style="color:red;">Error: ${err}</p>`;
+      }
+    });
+  </script>
 </body>
 </html>

@@ -1,16 +1,30 @@
-from io import BytesIO
-from pdfminer.high_level import extract_text
+"""
+utils.py
+
+Robust PDF text extraction for FastAPI uploads.
+"""
+
+from PyPDF2 import PdfReader
+import io
 
 
-def extract_text_from_pdf(pdf_bytes: bytes) -> str:
-    """
-    Safely extract text from a PDF file.
-    Returns empty string if extraction fails.
-    """
+def extract_text_from_pdf(uploaded_file) -> str:
     try:
-        with BytesIO(pdf_bytes) as pdf_stream:
-            text = extract_text(pdf_stream)
-            return text.strip() if text else ""
+        # Read file bytes once
+        pdf_bytes = uploaded_file.file.read()
+
+        # Wrap bytes in a buffer PyPDF2 understands
+        pdf_stream = io.BytesIO(pdf_bytes)
+        reader = PdfReader(pdf_stream)
+
+        text = []
+        for page in reader.pages:
+            page_text = page.extract_text()
+            if page_text:
+                text.append(page_text)
+
+        return "\n".join(text) if text else "No readable text found in PDF."
+
     except Exception as e:
         print("PDF extraction error:", e)
-        return ""
+        raise RuntimeError("Failed to extract text from PDF")
