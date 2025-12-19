@@ -3,117 +3,263 @@
 <head>
   <meta charset="UTF-8" />
   <title>ResIQ AI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Premium font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
   <style>
+    :root {
+      --bg: #0f172a;
+      --card: rgba(255,255,255,0.08);
+      --border: rgba(255,255,255,0.15);
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --primary: #6366f1;
+      --success: #22c55e;
+      --danger: #ef4444;
+      --accent: linear-gradient(135deg, #6366f1, #8b5cf6);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      background: #f5f7fb;
-      padding: 40px;
+      margin: 0;
+      font-family: 'Inter', system-ui, sans-serif;
+      background: radial-gradient(circle at top, #1e293b, #020617);
+      color: var(--text);
     }
-    .container {
-      max-width: 800px;
+
+    .app {
+      max-width: 1100px;
       margin: auto;
-      background: white;
-      padding: 30px;
-      border-radius: 8px;
+      padding: 50px 24px;
     }
-    textarea, input {
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 40px;
+    }
+
+    header h1 {
+      font-size: 36px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      background: var(--accent);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    header span {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .card {
+      background: var(--card);
+      backdrop-filter: blur(14px);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 28px;
+      margin-bottom: 28px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: block;
+      color: var(--muted);
+    }
+
+    input[type="file"],
+    textarea {
       width: 100%;
-      margin-top: 10px;
-      padding: 10px;
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.05);
+      color: var(--text);
+      font-size: 14px;
     }
+
+    textarea {
+      min-height: 160px;
+      resize: vertical;
+    }
+
     button {
-      margin-top: 15px;
-      padding: 12px;
       width: 100%;
+      padding: 16px;
+      border-radius: 14px;
       font-size: 16px;
+      font-weight: 700;
+      border: none;
       cursor: pointer;
+      background: var(--accent);
+      color: white;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
-    .result {
-      margin-top: 25px;
-      padding: 15px;
-      border-radius: 6px;
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 30px rgba(99,102,241,0.35);
     }
+
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .pill {
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
     .match {
-      background: #e7f7ec;
-      border-left: 6px solid #28a745;
+      background: rgba(34,197,94,0.15);
+      color: var(--success);
     }
+
     .nomatch {
-      background: #fdeaea;
-      border-left: 6px solid #dc3545;
+      background: rgba(239,68,68,0.15);
+      color: var(--danger);
     }
+
+    .score {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .bar-container {
+      background: rgba(255,255,255,0.1);
+      border-radius: 999px;
+      overflow: hidden;
+      height: 14px;
+      margin: 12px 0 24px;
+    }
+
+    .bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #22c55e, #6366f1);
+      transition: width 0.8s ease;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin: 18px 0 10px;
+    }
+
     ul {
-      margin-top: 8px;
+      padding-left: 18px;
+      margin: 0;
+    }
+
+    li {
+      font-size: 14px;
+      margin-bottom: 8px;
+      line-height: 1.6;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    @media (max-width: 900px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
+
 <body>
-  <div class="container">
-    <h2>ResIQ AI — Resume Matcher</h2>
+  <div class="app">
+    <header>
+      <h1>ResIQ AI</h1>
+      <span>Intelligent Resume–Job Matching</span>
+    </header>
 
-    <form id="analyze-form">
-      <label>Upload Resume (PDF)</label>
-      <input type="file" id="resume" accept=".pdf" required />
+    <form id="analyzeForm" class="card grid">
+      <div>
+        <label>Upload Resume (PDF)</label>
+        <input type="file" name="resume" required />
+      </div>
 
-      <label>Job Description</label>
-      <textarea id="job" rows="6" required></textarea>
+      <div>
+        <label>Job Description</label>
+        <textarea name="job_description" placeholder="Paste the job description here..." required></textarea>
+      </div>
 
-      <button type="submit">Analyze</button>
+      <div style="grid-column: span 2;">
+        <button type="submit">Analyze Resume</button>
+      </div>
     </form>
 
-    <div id="loading" style="display:none;">Analyzing…</div>
-
-    <div id="output"></div>
+    <div id="result"></div>
   </div>
 
   <script>
-    const form = document.getElementById("analyze-form");
-    const output = document.getElementById("output");
-    const loading = document.getElementById("loading");
+    const form = document.getElementById("analyzeForm");
+    const result = document.getElementById("result");
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
-      output.innerHTML = "";
-      loading.style.display = "block";
+      result.innerHTML = "";
 
-      const resume = document.getElementById("resume").files[0];
-      const job = document.getElementById("job").value;
+      const formData = new FormData(form);
+      const res = await fetch("/analyze", { method: "POST", body: formData });
+      const data = await res.json();
 
-      const formData = new FormData();
-      formData.append("resume", resume);
-      formData.append("job_description", job);
+      const similarityPercent = Math.round((data.confidence || 0) * 100);
+      const isMatch = data.prediction === 1;
 
-      try {
-        const res = await fetch("/analyze", {
-          method: "POST",
-          body: formData
-        });
-
-        const data = await res.json();
-
-        loading.style.display = "none";
-
-        const isMatch = data.prediction === 1;
-
-        output.innerHTML = `
-          <div class="result ${isMatch ? "match" : "nomatch"}">
-            <h3>${isMatch ? "Match ✅" : "No Match ❌"}</h3>
-            <p><strong>Semantic Similarity:</strong> ${data.confidence}</p>
-
-            <h4>Why this result</h4>
-            <ul>
-              ${data.explanation.map(e => `<li>${e}</li>`).join("")}
-            </ul>
-
-            <h4>Resume Recommendations</h4>
-            <ul>
-              ${data.recommendations.map(r => `<li>${r}</li>`).join("")}
-            </ul>
+      result.innerHTML = `
+        <div class="card">
+          <div class="result-header">
+            <div class="pill ${isMatch ? "match" : "nomatch"}">
+              ${isMatch ? "Match" : "No Match"}
+            </div>
+            <div class="score">${similarityPercent}% similarity</div>
           </div>
-        `;
-      } catch (err) {
-        loading.style.display = "none";
-        output.innerHTML = `<p style="color:red;">Error: ${err}</p>`;
-      }
+
+          <div class="bar-container">
+            <div class="bar" style="width: ${similarityPercent}%"></div>
+          </div>
+
+          <div class="section-title">Explanation</div>
+          <ul>${data.explanation.map(e => `<li>${e}</li>`).join("")}</ul>
+
+          <div class="section-title">Issues Identified</div>
+          ${
+            data.issues.length
+              ? `<ul>${data.issues.map(i => `<li>${i}</li>`).join("")}</ul>`
+              : `<p class="muted">No major issues detected.</p>`
+          }
+
+          <div class="section-title">How to Improve Your Resume</div>
+          <ul>${data.recommendations.map(r => `<li>${r}</li>`).join("")}</ul>
+        </div>
+      `;
     });
   </script>
 </body>
